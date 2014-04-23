@@ -4,10 +4,15 @@
 #include<linux/string.h>
 using namespace std;
 //merge sorted array[start...middle-1] and sorted array[middle...end] to array[start...end].
-void merge(int* array, int start, int end, int middle)
+void merge(int* array, int start, int end, int middle, bool is_debug)
 {
-    int n1 = middle - start;
+    int n1 = middle - start + 1;
     int n2 = end - middle;
+
+    int i = 0, j = 0;
+
+    if(n1&&n2 == 0)
+        return;
 
     int* array1 = new int[n1];
     if(array1 == NULL)
@@ -15,15 +20,44 @@ void merge(int* array, int start, int end, int middle)
     
     int* array2 = new int[n2];
     if(array2 == NULL)
+    {
+        delete[] array1;
+        array1 = NULL;
         return;
-
-    for(int i = start; i < middle; i++)
+    }
+    if(is_debug)
+    {
+        cout<<endl;
+        cout<<"--------------merge start-----------------"<<endl;
+        cout<<"start: "<<start<<"end: "<<end<<"middle: "<<middle<<endl;
+        cout<<"array1: ";
+    }
+    for(i = start; i < middle+1; i++)
+    {
         array1[i-start] = array[i];
+    
+        if(is_debug)
+            cout<<array1[i-start]<<" ";
+    }
+    
+        
+    if(is_debug)
+    {
+        cout<<endl;
+        cout<<"array2: ";
+    }
 
-    for(int i = middle; i < end+1; i++)
-        array2[i-middle] = array[i];
+    for(i = middle+1; i < end+1; i++)
+    {
+        array2[i-middle-1] = array[i];
 
-    int i = 0, j = 0;
+        if(is_debug)
+            cout<<array2[i-middle-1]<<" ";
+    }
+    if(is_debug)
+        cout<<endl;
+    i = 0;
+    j = 0;
     for(int n = start; n <= end; n++)
     {
         if(i >= n1)
@@ -33,8 +67,6 @@ void merge(int* array, int start, int end, int middle)
                 array[n] = array2[j];
                 j++;
             }
-            else
-                break;
         }
         else if(j >= n2)
         {
@@ -54,27 +86,56 @@ void merge(int* array, int start, int end, int middle)
                 i++;
             }
         }
+        if(is_debug)
+            cout<<array[n]<<" ";
     }
+    if(is_debug)
+    {
+        cout<<endl;
+        cout<<"-----------------merge end-------------- "<<endl;
+        cout<<endl;
+    }
+    delete[] array1;
+    delete[] array2;
+    array1 = NULL;
+    array2 = NULL;
 
 }
 
-void merge_sort(int* array, int start, int end)
+void merge_sort(int* array, int start, int end, bool is_debug)
 {
-    if((end - start) < 2)
+    if((end - start) < 1)
         return;
 
-    int middle = (end - start)/2;
+    int middle = (end + start)/2;
 
-    merge_sort(array, start, middle-1);
-    merge_sort(array, middle, end);
-    merge(array, start, end, middle);
+    merge_sort(array, start, middle, is_debug);
+    merge_sort(array, middle+1, end, is_debug);
+    merge(array, start, end, middle, is_debug);
 }
 int main(int argc, char* argv[])
 {
     int d[10];
     memset(d,0,10*sizeof(int));
 
+    bool is_debug = false;
+    if(argc == 2)
+    {
+        if((argv[1][0] == '-')&&(argv[1][1] == 'd'))
+            is_debug = true;
+        else
+        {
+            cout<<"example: merge //not debug"<<endl;
+            cout<<"example: merge -d //debug"<<endl;
+        }
+    }
+
     srand(time(NULL));
+    if(is_debug)
+    {
+        cout<<endl;
+        cout<<"-----------------------------------"<<endl;
+    }
     
     for(int i = 0; i < 10; i++)
     {
@@ -83,7 +144,7 @@ int main(int argc, char* argv[])
     }
     cout<<std::endl;
     
-    merge_sort(d, 0, 9);
+    merge_sort(d, 0, 9,is_debug);
     for(int i = 0; i < 10; i++)
         cout<<d[i]<<" ";
     cout<<std::endl;
